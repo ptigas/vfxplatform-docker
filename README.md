@@ -6,7 +6,7 @@ Docker container for [CY2018 VFX Reference Platform](http://www.vfxplatform.com)
 
 ## Build info
 
-If there's no version specified, the application has not yet been added to the Dockerfile/image. Feel free to create a PR! :smile:
+If there's no version specified, the application has not yet been added to the Dockerfile/image.
 
 
 |        | gcc   | glibc | python | Qt    | PyQt | PySide           | NumPy | OpenEXR | Ptex | OpenSubdiv | OpenVDB | Alembic | FBX | OpenColorIO | ACES | Boost | Intel TBB | Intel MKL | C++ API/SDK |
@@ -16,10 +16,11 @@ If there's no version specified, the application has not yet been added to the D
 
 <br><br>
 
-## Try it
+## Use the docker image
 
+### For CY2018
 ```bash
-docker run --rm -ti fredrikaverpil/vfxplatform:[TAG] bash
+docker run --rm -ti ptigas/vfxplatform:CY2018 bash
 ```
 
 <br><br>
