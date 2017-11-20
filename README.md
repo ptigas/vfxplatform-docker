@@ -1,6 +1,6 @@
 # vfxplatform-docker
 
-I wanted to build PySide2 based on [CY2018 VFX Reference Platform](http://www.vfxplatform.com) in a CentOS container and I'm just sharing this work here. Perhaps this will grow to cover more applications...
+Docker container for [CY2018 VFX Reference Platform](http://www.vfxplatform.com).
 
 <br><br>
 
@@ -11,11 +11,8 @@ If there's no version specified, the application has not yet been added to the D
 
 |        | gcc   | glibc | python | Qt    | PyQt | PySide           | NumPy | OpenEXR | Ptex | OpenSubdiv | OpenVDB | Alembic | FBX | OpenColorIO | ACES | Boost | Intel TBB | Intel MKL | C++ API/SDK |
 | ------ | ----- | ----- | ------ | ----- | ---- | ---------------- | ----- | ------- | ---- | ---------- | ------- | ------- | --- | ----------- | ---- | ----- | --------- | --------- | ----------- |
-| CY2018 | 5.3.1 | 2.17  | 2.7.5  | 5.6.1 |      | 2.x (5.6 branch) |       |         |      |            |         |         |     |             |      |       |           |           |             |
+| CY2018 | 5.3.1 | 2.17  | 2.7.5  | 5.6.1 |      | 2.x (5.6 branch) | 1.12.1| 2.2.0   |      |            |  5.0.0  |         |     |             |      | 1.61.0| 2017 update 6 |       |   C++14     |
 
-
-* Build logs are available as attachments to [releases](https://github.com/fredrikaverpil/vfxplatform-docker/releases).
-* Docker images are available in [Dockerhub](https://hub.docker.com/r/fredrikaverpil/vfxplatform/tags/).
 
 <br><br>
 
@@ -24,7 +21,5 @@ If there's no version specified, the application has not yet been added to the D
 ```bash
 docker run --rm -ti fredrikaverpil/vfxplatform:[TAG] bash
 ```
-
-Or you can begin your own Dockerfile with e.g. `FROM fredrikaverpil/vfxplatform:[TAG]` to base it on an image.
 
 <br><br>

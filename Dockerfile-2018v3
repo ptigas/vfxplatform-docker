@@ -9,8 +9,9 @@ FROM centos:7.3.1611
 # Show available devtools-4 packages
 # RUN yum list available devtoolset-4-\*
 
-RUN yum install -y deltarpm && \
-    yum update -y && \
+RUN yum -y update; yum clean all
+
+RUN yum install -y deltarpm && \    
     yum install -y git centos-release-scl && \
     yum install -y devtoolset-4-gcc*-5.3.1 && \
     yum install -y epel-release && \
@@ -18,7 +19,7 @@ RUN yum install -y deltarpm && \
     yum install -y libXrender* libxcb* xcb* fontconfig* freetype* libXi* libXext* libX11* libSM* libICE* libglib* libpthread* gstreamer* \
                    bison* flex* gperf* libicu-devel libxslt-devel ruby \
                    libgcrypt-devel libgcrypt pciutils-devel nss-devel libXtst-devel gperf cups-devel pulseaudio-libs-devel libgudev1-devel systemd-devel libcap-devel alsa-lib-devel flex bison ruby gcc-c++ dbus libXrandr-devel libXcomposite-devel libXcursor-devel dbus-devel fontconfig-devel && \
-    yum install -y libxslt libxml2 libxml2-devel libxslt-devel cmake3 openssl*
+    yum install -y libxslt libxml2 libxml2-devel libxslt-devel cmake3 openssl* wget bzip2-devel
 
 # Activate devtoolset-4 gcc 5.3.1
 # RUN scl enable devtoolset-4 bash
@@ -27,6 +28,38 @@ ENV PATH="/opt/rh/devtoolset-4/root/usr/bin:${PATH}"
 # Set workdir
 RUN mkdir -p /workdir
 WORKDIR /workdir
+
+# install intel tbb
+RUN wget https://github.com/01org/tbb/releases/download/2017_U6/tbb2017_20170412oss_lin.tgz
+RUN mkdir -p /opt/intel
+RUN tar -xvzf tbb2017_20170412oss_lin.tgz -C /opt/intel/
+RUN chmod a+x /opt/intel/tbb2017_20170412oss/bin/tbbvars.sh
+RUN echo "source /opt/intel/tbb2017_20170412oss/bin/tbbvars.sh intel64 linux auto_tbbroot" > ~/.bashrc
+
+# install boost
+RUN wget https://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz
+RUN tar -xzvf boost_1_61_0.tar.gz
+RUN cd boost_1_61_0 && ./bootstrap.sh && ./b2 install -j $(nproc --all)
+
+RUN wget http://download.savannah.nongnu.org/releases/openexr/ilmbase-2.2.0.tar.gz
+RUN tar -xvf ilmbase-2.2.0.tar.gz && cd ilmbase-2.2.0 && ./configure --prefix=/usr/local && make -j $(nproc --all) && make install
+
+RUN wget http://download.savannah.nongnu.org/releases/openexr/openexr-2.2.0.tar.gz
+RUN tar -xvf openexr-2.2.0.tar.gz && cd openexr-2.2.0 && ./configure --prefix=/usr/local --disable-ilmbasetest && make -j $(nproc --all) && make install
+
+RUN pip install numpy==1.12.1
+RUN mkdir -p /python/include/ && ln -s /usr/include/python2.7/ /python/include/
+RUN ln -s /usr/local/lib/libboost_python.a /usr/local/lib/libboost_python-mt.a
+RUN ln -s /usr/local/lib/libboost_python.so /usr/local/lib/libboost_python-mt.so
+RUN mkdir -p /rel/lang/python/2.7.9-1/lib/python2.7/site-packages/ && ln -s /usr/lib64/python2.7/site-packages/numpy /rel/lang/python/2.7.9-1/lib/python2.7/site-packages/
+RUN yum install -y unzip log4cplus-devel jemalloc-devel blosc-devel cppunit-devel glfw-devel freeglut-devel doxygen
+RUN wget http://www.openvdb.org/download/openvdb_5_0_0_library.zip
+RUN unzip openvdb_5_0_0_library.zip 
+RUN cd openvdb && \
+    source /opt/intel/tbb2017_20170412oss/bin/tbbvars.sh intel64 linux auto_tbbroot && \
+    HDSO=/opt/intel/tbb2017_20170412oss/lib/intel64/gcc4.7/libtbb HT=/opt/intel/tbb2017_20170412oss/ make -j $(nproc --all)
+#RUN cd openvdb && HDSO=/opt/intel/tbb2017_20170412oss/lib/intel64/gcc4.7/libtbb HT=/opt/intel/tbb2017_20170412oss/ make install -j $(nproc --all)
+RUN cd openvdb && LD_LIBRARY_PATH=/usr/local/lib/:/opt/intel/tbb2017_20170412oss/lib/intel64/gcc4.7 make test
 
 # Clone git repositories
 RUN git clone --recursive --branch 5.6.1 https://code.qt.io/qt/qt5.git qt5 && \
@@ -42,7 +75,7 @@ RUN cd qt5 && \
 RUN cd qt5 && \
     ./configure -opensource -confirm-license -nomake examples -nomake tests
 RUN cd qt5 && \
-    make
+    make -j $(nproc --all)
 RUN cd qt5 && \
     make install
 
@@ -56,3 +89,6 @@ RUN cd pyside-setup && \
            --cmake=/usr/bin/cmake3 \
            --openssl=/usr/bin/openssl
 RUN pip install /workdir/pyside-setup/dist/*.whl
+
+#clean workdir
+#RUN rm -rf /workdir/*
